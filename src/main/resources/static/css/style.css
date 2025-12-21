@@ -26,14 +26,15 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: 
+    background-image:
         radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 20%),
         radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 20%);
 }
 
 .app-container {
     width: 100%;
-    max-width: 480px; /* Mobile first feel */
+    max-width: 480px;
+    /* Mobile first feel */
     padding: 20px;
 }
 
@@ -47,8 +48,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .card {
@@ -61,11 +69,13 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-h1, h2 {
+h1,
+h2 {
     font-weight: 700;
     margin-bottom: 8px;
     background: linear-gradient(to right, #fff, #cbd5e1);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -86,7 +96,8 @@ label {
     color: var(--text-muted);
 }
 
-input, select {
+input,
+select {
     width: 100%;
     background: rgba(15, 23, 42, 0.5);
     border: 1px solid var(--border);
@@ -97,7 +108,8 @@ input, select {
     transition: all 0.2s;
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
@@ -156,6 +168,33 @@ input:focus, select:focus {
     text-align: center;
 }
 
+.role-selector {
+    display: flex;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 4px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+}
+
+.role-btn {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border-radius: 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.role-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
 /* Utils */
 .flex-between {
     display: flex;
@@ -163,6 +202,14 @@ input:focus, select:focus {
     align-items: center;
 }
 
-.text-center { text-align: center; }
-.mb-4 { margin-bottom: 16px; }
-.mt-4 { margin-top: 16px; }
+.text-center {
+    text-align: center;
+}
+
+.mb-4 {
+    margin-bottom: 16px;
+}
+
+.mt-4 {
+    margin-top: 16px;
+}

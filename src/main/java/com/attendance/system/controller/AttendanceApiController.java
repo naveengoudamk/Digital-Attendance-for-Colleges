@@ -33,7 +33,7 @@ public class AttendanceApiController {
             User user = userOpt.get();
             if (user.getPassword().equals(password)) {
                 // Check Role
-                if (!user.getRole().name().equalsIgnoreCase(roleStr)) {
+                if (roleStr == null || !user.getRole().name().equalsIgnoreCase(roleStr)) {
                     return ResponseEntity.status(401).body("Role mismatch for this user");
                 }
                 // Check Department (if applicable - Admin might not need check, but user asked

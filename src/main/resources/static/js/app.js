@@ -29,7 +29,7 @@ function init() {
     }
     else if (currentUser.role === 'STUDENT') {
         showView('student');
-        // document.getElementById('user-name-display-student').innerText = `Welcome, ${currentUser.fullName}`;
+        document.getElementById('user-name-display-student').innerText = `Welcome, ${currentUser.fullName}`;
     }
     else {
         // Fallback for others
