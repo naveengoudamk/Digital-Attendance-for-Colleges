@@ -84,9 +84,25 @@
                 <h2>Mark Attendance</h2>
                 <p>Ensure you are in class and location is enabled.</p>
 
-                <button id="scan-btn" class="btn btn-primary" style="display:none">Scan QR Code</button>
+                <div class="input-group">
+                    <label>Session ID</label>
+                    <input type="text" id="student-session-id" placeholder="Enter ID from Faculty">
+                </div>
+                <div class="input-group">
+                    <label>Session Token</label>
+                    <input type="text" id="student-token" placeholder="Enter Token shown on Screen">
+                </div>
+                <!-- Mock Location for Students (Laptops) -->
+                <div class="input-group">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="student-mock-location" style="width:auto;">
+                        <span style="font-size:0.9rem; color:var(--text-muted)">Use Developer/Mock Location (Fixes
+                            Access Denied)</span>
+                    </label>
+                </div>
 
-                <button id="manual-mark-btn" class="btn btn-primary">Enter Session Details</button>
+                <button id="scan-btn" class="btn btn-primary" style="display:none">Scan QR Code</button>
+                <button id="manual-mark-btn" class="btn btn-primary">Mark Attendance</button>
 
                 <div class="mt-4">
                     <h3>Recent History</h3>

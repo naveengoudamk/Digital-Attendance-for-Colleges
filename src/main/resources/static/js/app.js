@@ -199,15 +199,18 @@ function generateQRCode(token) {
 }
 
 // Student logic
+// Student logic
 const manualMarkBtn = document.getElementById('manual-mark-btn');
 if (manualMarkBtn) {
     manualMarkBtn.addEventListener('click', () => {
-        const sid = prompt("Enter Session ID:");
-        const token = prompt("Enter Token:");
-        if (!sid || !token) return;
+        const sid = document.getElementById('student-session-id').value;
+        const token = document.getElementById('student-token').value;
+        const useMock = document.getElementById('student-mock-location').checked;
 
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const { latitude, longitude } = position.coords;
+        if (!sid || !token) return alert("Please enter Session ID and Token");
+
+        // Helper
+        const sendMarkRequest = async (lat, lng) => {
             try {
                 const res = await fetch(`${API_BASE}/mark-attendance`, {
                     method: 'POST',
@@ -216,13 +219,34 @@ if (manualMarkBtn) {
                         sessionId: sid,
                         studentId: currentUser.id,
                         qrToken: token,
-                        latitude,
-                        longitude
+                        latitude: lat,
+                        longitude: lng
                     })
                 });
                 alert(await res.text());
-            } catch (e) { alert(e); }
-        });
+                // Optional: Refresh history or clear fields
+            } catch (e) { alert("Network Error"); }
+        };
+
+        if (useMock) {
+            sendMarkRequest(12.9716, 77.5946);
+        } else {
+            if (!navigator.geolocation) return alert('Geolocation is required');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    sendMarkRequest(latitude, longitude);
+                },
+                (err) => {
+                    if (confirm("Location access denied. Switch to Mock Location Mode?")) {
+                        document.getElementById('student-mock-location').checked = true;
+                        sendMarkRequest(12.9716, 77.5946);
+                    } else {
+                        alert('Location access denied. Cannot mark attendance.');
+                    }
+                }
+            );
+        }
     });
 }
 
