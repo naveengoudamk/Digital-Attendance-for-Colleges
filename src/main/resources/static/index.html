@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AttendEase</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- Faculty View -->
+        <div id="faculty-view" class="panel">
+            <div class="flex-between mb-4">
+                <div id="user-name-display" style="font-weight:600"></div>
+                <button onclick="logout()"
+                    style="background:none; border:none; color:var(--secondary); cursor:pointer;">Logout</button>
+            </div>
+
+            <div class="card" id="session-setup">
+                <h2>New Session</h2>
+                <div class="input-group">
+                    <label>Subject</label>
+                    <select id="subject">
+                        <option value="Java Full Stack">Java Full Stack</option>
+                        <option value="Data Structures">Data Structures</option>
+                        <option value="Database Systems">Database Systems</option>
+                    </select>
+                </div>
+                <button id="start-session-btn" class="btn btn-primary">Start Session & Generate QR</button>
+            </div>
+
+            <div class="card" id="session-active" style="display:none; text-align:center;">
+                <h2 style="color:var(--success)">Session Active</h2>
+                <p>Scan this QR code to mark attendance</p>
+                <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0;"></div>
+                <p style="font-size:0.8rem">Session ID: <span id="display-session-id">1</span> (Share if needed)</p>
+                <button class="btn btn-secondary" onclick="location.reload()">End Session</button>
+            </div>
+        </div>
+
+        <!-- Student View -->
+        <div id="student-view" class="panel">
+            <div class="flex-between mb-4">
+                <div id="user-name-display-student" style="font-weight:600">Student Portal</div>
+                <button onclick="logout()"
+                    style="background:none; border:none; color:var(--secondary); cursor:pointer;">Logout</button>
+            </div>
+
+            <div class="card">
+                <h2>Mark Attendance</h2>
+                <p>Ensure you are in class and location is enabled.</p>
+
+                <button id="scan-btn" class="btn btn-primary" style="display:none">Scan QR Code</button>
+
+                <button id="manual-mark-btn" class="btn btn-primary">Enter Session Details</button>
+
+                <div class="mt-4">
+                    <h3>Recent History</h3>
+                    <div id="history-list" style="margin-top:10px; font-size:0.9rem; color:var(--text-muted)">
+                        <div style="padding:10px; border-bottom:1px solid var(--border)">Java Full Stack - <span
+                                style="color:var(--success)">Present</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
