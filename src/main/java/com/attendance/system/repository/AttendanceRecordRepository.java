@@ -14,4 +14,6 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
     // first?
     // Actually we only care about if they are already PRESENT.
     boolean existsBySessionAndStudentAndStatus(AttendanceSession session, User student, AttendanceRecord.Status status);
+
+    java.util.List<AttendanceRecord> findByStudent(User student);
 }

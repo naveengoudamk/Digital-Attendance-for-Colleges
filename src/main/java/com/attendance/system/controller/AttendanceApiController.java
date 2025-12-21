@@ -101,4 +101,14 @@ public class AttendanceApiController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/admin/users")
+    public ResponseEntity<?> getAllUsers() {
+        return ResponseEntity.ok(attendanceService.getAllUsers());
+    }
+
+    @GetMapping("/student/{id}/history")
+    public ResponseEntity<?> getStudentHistory(@PathVariable Long id) {
+        return ResponseEntity.ok(attendanceService.getStudentHistory(id));
+    }
 }

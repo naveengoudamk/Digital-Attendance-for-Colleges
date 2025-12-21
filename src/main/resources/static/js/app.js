@@ -7,7 +7,8 @@ let currentSession = null;
 // DOM Elements
 const views = {
     faculty: document.getElementById('faculty-view'),
-    student: document.getElementById('student-view')
+    student: document.getElementById('student-view'),
+    admin: document.getElementById('admin-view')
 };
 
 function showView(viewName) {
@@ -30,6 +31,7 @@ function init() {
     else if (currentUser.role === 'STUDENT') {
         showView('student');
         document.getElementById('user-name-display-student').innerText = `Welcome, ${currentUser.fullName}`;
+        loadStudentHistory();
     }
     else if (currentUser.role === 'ADMIN') {
         showView('admin');
@@ -42,8 +44,6 @@ function init() {
     }
 }
 
-// ... existing code ...
-
 // Admin Logic
 const views_admin = {
     dashboard: document.getElementById('admin-tab-dashboard'),
@@ -55,6 +55,11 @@ window.switchAdminTab = (tabName) => {
     Object.values(views_admin).forEach(el => el.style.display = 'none');
     // Show target
     if (views_admin[tabName]) views_admin[tabName].style.display = 'block';
+
+    // Lazy load users
+    if (tabName === 'users') {
+        loadUsers();
+    }
 
     // Update buttons active state
     const btns = document.querySelectorAll('#admin-view .role-btn');
@@ -82,6 +87,27 @@ async function loadAdminStats() {
     }
 }
 
+async function loadUsers() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/users`);
+        if (res.ok) {
+            const users = await res.json();
+            const tbody = document.getElementById('user-list-body');
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05)">${u.role}</td>
+                    <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05)">${u.fullName}</td>
+                    <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05)">${u.department}</td>
+                    <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05)">${u.username}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    } catch (e) { console.error("Failed to load users", e); }
+}
+
 const createUserForm = document.getElementById('create-user-form');
 if (createUserForm) {
     createUserForm.addEventListener('submit', async (e) => {
@@ -103,6 +129,7 @@ if (createUserForm) {
                 alert('User Created Successfully');
                 createUserForm.reset();
                 loadAdminStats(); // Refresh stats
+                loadUsers(); // Refresh list
             } else {
                 alert('Failed: ' + await res.text());
             }
@@ -111,6 +138,45 @@ if (createUserForm) {
         }
     });
 }
+
+// Student History
+async function loadStudentHistory() {
+    try {
+        const res = await fetch(`${API_BASE}/student/${currentUser.id}/history`);
+        if (res.ok) {
+            const records = await res.json();
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+
+            if (records.length === 0) {
+                container.innerHTML = '<div style="padding:10px;">No records found.</div>';
+                return;
+            }
+
+            records.forEach(r => {
+                // Date formatting
+                const date = new Date(r.timestamp).toLocaleString();
+                const statusColor = r.status === 'PRESENT' ? 'var(--success)' : 'var(--error)';
+
+                const div = document.createElement('div');
+                div.style.padding = '10px';
+                div.style.borderBottom = '1px solid var(--border)';
+                div.innerHTML = `
+                    <div class="flex-between">
+                        <span style="font-weight:600">${r.session.subject}</span>
+                        <span style="color:${statusColor}">${r.status}</span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">
+                        ${date}
+                        ${r.rejectionReason ? `<br><span style="color:var(--error)">Reason: ${r.rejectionReason}</span>` : ''}
+                    </div>
+                 `;
+                container.appendChild(div);
+            });
+        }
+    } catch (e) { console.error(e); }
+}
+
 
 // Logout
 function logout() {
@@ -150,6 +216,15 @@ if (startSessionBtn) {
 
                     // Generate QR
                     generateQRCode(currentSession.sessionToken);
+
+                    const tokenDisplay = document.getElementById('display-token');
+                    if (tokenDisplay) {
+                        tokenDisplay.innerText = currentSession.sessionToken;
+                        tokenDisplay.onclick = () => {
+                            navigator.clipboard.writeText(currentSession.sessionToken);
+                            alert("Token Copied!");
+                        }
+                    }
                     document.getElementById('display-session-id').innerText = currentSession.id;
                 } else {
                     alert("Error: " + await res.text());
@@ -180,8 +255,6 @@ if (startSessionBtn) {
             );
         }
     });
-
-    // Also Initialize Checkbox state from localStorage if needed (optional)
 }
 
 function generateQRCode(token) {
@@ -198,7 +271,6 @@ function generateQRCode(token) {
     }
 }
 
-// Student logic
 // Student logic
 const manualMarkBtn = document.getElementById('manual-mark-btn');
 if (manualMarkBtn) {
@@ -224,7 +296,7 @@ if (manualMarkBtn) {
                     })
                 });
                 alert(await res.text());
-                // Optional: Refresh history or clear fields
+                loadStudentHistory(); // Refresh history
             } catch (e) { alert("Network Error"); }
         };
 

@@ -67,6 +67,15 @@
                 <h2 style="color:var(--success)">Session Active</h2>
                 <p>Scan this QR code to mark attendance</p>
                 <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0;"></div>
+
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:15px;">
+                    <p style="margin-bottom:5px; color:var(--text-muted); font-size:0.9rem;">Manual Token (For Laptops)
+                    </p>
+                    <h1 id="display-token"
+                        style="font-family:monospace; color:var(--primary); letter-spacing:2px; cursor:pointer;"
+                        title="Click to Copy"></h1>
+                </div>
+
                 <p style="font-size:0.8rem">Session ID: <span id="display-session-id">1</span> (Share if needed)</p>
                 <button class="btn btn-secondary" onclick="location.reload()">End Session</button>
             </div>
@@ -174,6 +183,25 @@
 
             <!-- Tab: Manage Users -->
             <div id="admin-tab-users" style="display:none;">
+                <div class="card mb-4" id="user-list-card">
+                    <h3>All Users</h3>
+                    <div style="max-height:200px; overflow-y:auto; margin-top:10px;">
+                        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                            <thead>
+                                <tr style="text-align:left; border-bottom:1px solid var(--border)">
+                                    <th style="padding:8px; color:var(--text-muted)">Role</th>
+                                    <th style="padding:8px; color:var(--text-muted)">Name</th>
+                                    <th style="padding:8px; color:var(--text-muted)">Dept</th>
+                                    <th style="padding:8px; color:var(--text-muted)">Email</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-list-body">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div class="card">
                     <h3>Add New User</h3>
                     <form id="create-user-form">

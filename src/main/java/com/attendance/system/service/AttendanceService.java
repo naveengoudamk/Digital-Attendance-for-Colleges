@@ -141,4 +141,13 @@ public class AttendanceService {
         User user = new User(null, username, password, fullName, department, role);
         return userRepository.save(user);
     }
+
+    public java.util.List<AttendanceRecord> getStudentHistory(Long studentId) {
+        User student = userRepository.findById(studentId).orElseThrow();
+        return recordRepository.findByStudent(student);
+    }
+
+    public java.util.List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 }
