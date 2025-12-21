@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface AttendanceSessionRepository extends JpaRepository<AttendanceSession, Long> {
     List<AttendanceSession> findByFacultyAndIsActive(User faculty, boolean isActive);
+
+    long countByIsActive(boolean isActive);
 }

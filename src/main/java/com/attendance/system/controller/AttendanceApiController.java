@@ -74,4 +74,27 @@ public class AttendanceApiController {
         }
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/admin/stats")
+    public ResponseEntity<?> getAdminStats() {
+        return ResponseEntity.ok(attendanceService.getAdminStats());
+    }
+
+    @PostMapping("/admin/users")
+    public ResponseEntity<?> createUser(@RequestBody Map<String, String> payload) {
+        try {
+            String username = payload.get("username");
+            String password = payload.get("password");
+            String fullName = payload.get("fullName");
+            String department = payload.get("department");
+            String roleStr = payload.get("role");
+
+            User.Role role = User.Role.valueOf(roleStr); // simple enum conversion
+
+            User newUser = attendanceService.createUser(username, password, fullName, department, role);
+            return ResponseEntity.ok(newUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

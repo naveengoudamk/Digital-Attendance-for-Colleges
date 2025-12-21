@@ -69,9 +69,103 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="js/app.js"></script>
+        <!-- Admin View -->
+        <div id="admin-view" class="panel">
+            <div class="flex-between mb-4">
+                <div style="font-weight:600">Admin Dashboard</div>
+                <button onclick="logout()"
+                    style="background:none; border:none; color:var(--secondary); cursor:pointer;">Logout</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="role-selector" style="margin-bottom:20px;">
+                <div class="role-btn active" onclick="switchAdminTab('dashboard')">Overview</div>
+                <div class="role-btn" onclick="switchAdminTab('users')">Manage Users</div>
+            </div>
+
+            <!-- Tab: Dashboard -->
+            <div id="admin-tab-dashboard">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
+                    <div class="card" style="padding:16px; text-align:center;">
+                        <h3 id="stat-students" style="color:var(--primary); font-size:1.5rem">0</h3>
+                        <small>Total Students</small>
+                    </div>
+                    <div class="card" style="padding:16px; text-align:center;">
+                        <h3 id="stat-faculty" style="color:var(--secondary); font-size:1.5rem">0</h3>
+                        <small>Total Faculty</small>
+                    </div>
+                    <div class="card" style="padding:16px; text-align:center;">
+                        <h3 id="stat-sessions" style="color:var(--success); font-size:1.5rem">0</h3>
+                        <small>Active Sessions</small>
+                    </div>
+                    <div class="card" style="padding:16px; text-align:center;">
+                        <h3 id="stat-defaulters" style="color:var(--error); font-size:1.5rem">0</h3>
+                        <small>Defaulters</small>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Analytics</h3>
+                    <p>Department-wise Attendance Performance</p>
+                    <!-- Mock Chart Bars -->
+                    <div style="margin-top:10px;">
+                        <div class="flex-between" style="font-size:0.8rem; margin-bottom:4px;"><span>CSE</span>
+                            <span>85%</span></div>
+                        <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+                            <div style="width:85%; height:100%; background:var(--primary)"></div>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <div class="flex-between" style="font-size:0.8rem; margin-bottom:4px;"><span>ECE</span>
+                            <span>72%</span></div>
+                        <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+                            <div style="width:72%; height:100%; background:var(--secondary)"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Manage Users -->
+            <div id="admin-tab-users" style="display:none;">
+                <div class="card">
+                    <h3>Add New User</h3>
+                    <form id="create-user-form">
+                        <div class="input-group">
+                            <label>Role</label>
+                            <select id="new-user-role">
+                                <option value="STUDENT">Student</option>
+                                <option value="FACULTY">Faculty</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="new-user-name" placeholder="e.g. Alice Smith" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Department</label>
+                            <select id="new-user-dept">
+                                <option value="CSE">CSE</option>
+                                <option value="IT">IT</option>
+                                <option value="ECE">ECE</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Email (Username)</label>
+                            <input type="email" id="new-user-email" placeholder="user@test.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="text" id="new-user-pass" value="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create User</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <script src="js/app.js"></script>
 </body>
 
 </html>

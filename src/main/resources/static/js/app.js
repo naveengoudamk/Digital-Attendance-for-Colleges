@@ -31,11 +31,85 @@ function init() {
         showView('student');
         document.getElementById('user-name-display-student').innerText = `Welcome, ${currentUser.fullName}`;
     }
+    else if (currentUser.role === 'ADMIN') {
+        showView('admin');
+        loadAdminStats();
+    }
     else {
         // Fallback for others
         alert("Unknown Role");
         logout();
     }
+}
+
+// ... existing code ...
+
+// Admin Logic
+const views_admin = {
+    dashboard: document.getElementById('admin-tab-dashboard'),
+    users: document.getElementById('admin-tab-users')
+}
+
+window.switchAdminTab = (tabName) => {
+    // Hide all
+    Object.values(views_admin).forEach(el => el.style.display = 'none');
+    // Show target
+    if (views_admin[tabName]) views_admin[tabName].style.display = 'block';
+
+    // Update buttons active state
+    const btns = document.querySelectorAll('#admin-view .role-btn');
+    btns.forEach(b => {
+        if (b.innerText.toLowerCase().includes(tabName === 'dashboard' ? 'overview' : 'users')) {
+            b.classList.add('active');
+        } else {
+            b.classList.remove('active');
+        }
+    });
+}
+
+async function loadAdminStats() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/stats`);
+        if (res.ok) {
+            const stats = await res.json();
+            document.getElementById('stat-students').innerText = stats.totalStudents;
+            document.getElementById('stat-faculty').innerText = stats.totalFaculty;
+            document.getElementById('stat-sessions').innerText = stats.activeSessions;
+            document.getElementById('stat-defaulters').innerText = stats.defaultersCount;
+        }
+    } catch (e) {
+        console.error("Failed to load stats", e);
+    }
+}
+
+const createUserForm = document.getElementById('create-user-form');
+if (createUserForm) {
+    createUserForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const role = document.getElementById('new-user-role').value;
+        const fullName = document.getElementById('new-user-name').value;
+        const department = document.getElementById('new-user-dept').value;
+        const username = document.getElementById('new-user-email').value;
+        const password = document.getElementById('new-user-pass').value;
+
+        try {
+            const res = await fetch(`${API_BASE}/admin/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role, fullName, department, username, password })
+            });
+
+            if (res.ok) {
+                alert('User Created Successfully');
+                createUserForm.reset();
+                loadAdminStats(); // Refresh stats
+            } else {
+                alert('Failed: ' + await res.text());
+            }
+        } catch (err) {
+            alert('Error creating user');
+        }
+    });
 }
 
 // Logout

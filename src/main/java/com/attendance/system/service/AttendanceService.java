@@ -118,4 +118,24 @@ public class AttendanceService {
         double distance = R * c * 1000; // convert to meters
         return distance;
     }
+
+    // Admin Stats
+    public java.util.Map<String, Object> getAdminStats() {
+        java.util.Map<String, Object> stats = new java.util.HashMap<>();
+        stats.put("totalStudents", userRepository.countByRole(User.Role.STUDENT));
+        stats.put("totalFaculty", userRepository.countByRole(User.Role.FACULTY));
+        stats.put("activeSessions", sessionRepository.countByIsActive(true));
+        // Simple mock for defaulters for now
+        stats.put("defaultersCount", 5);
+        return stats;
+    }
+
+    // Admin: Create User
+    public User createUser(String username, String password, String fullName, String department, User.Role role) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+        User user = new User(null, username, password, fullName, department, role);
+        return userRepository.save(user);
+    }
 }
