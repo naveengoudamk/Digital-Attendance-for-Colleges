@@ -7,6 +7,8 @@ if (localStorage.getItem('user')) {
 
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const role = e.target.role.value;
+    const department = e.target.department.value;
     const username = e.target.username.value;
     const password = e.target.password.value;
 
@@ -14,7 +16,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         const res = await fetch(`${API_BASE}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, role, department })
         });
 
         if (res.ok) {

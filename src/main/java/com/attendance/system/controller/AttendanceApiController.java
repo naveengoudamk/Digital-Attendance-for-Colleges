@@ -25,11 +25,25 @@ public class AttendanceApiController {
     public ResponseEntity<?> login(@RequestBody Map<String, String> creds) {
         String username = creds.get("username");
         String password = creds.get("password");
+        String roleStr = creds.get("role");
+        String department = creds.get("department");
 
-        Optional<User> user = userRepository.findByUsername(username);
-        if (user.isPresent() && user.get().getPassword().equals(password)) {
-            // Return user info (In real app, return JWT)
-            return ResponseEntity.ok(user.get());
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (user.getPassword().equals(password)) {
+                // Check Role
+                if (!user.getRole().name().equalsIgnoreCase(roleStr)) {
+                    return ResponseEntity.status(401).body("Role mismatch for this user");
+                }
+                // Check Department (if applicable - Admin might not need check, but user asked
+                // for it)
+                if (department != null && !department.isEmpty() && !user.getDepartment().equalsIgnoreCase(department)) {
+                    return ResponseEntity.status(401).body("Department mismatch");
+                }
+
+                return ResponseEntity.ok(user);
+            }
         }
         return ResponseEntity.status(401).body("Invalid credentials");
     }

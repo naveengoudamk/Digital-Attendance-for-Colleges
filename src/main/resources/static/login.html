@@ -20,7 +20,27 @@
 
                 <form id="login-form">
                     <div class="input-group">
-                        <label>Username</label>
+                        <label>Select Role</label>
+                        <select name="role">
+                            <option value="FACULTY">Faculty</option>
+                            <option value="STUDENT">Student</option>
+                            <option value="ADMIN">Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Department</label>
+                        <select name="department">
+                            <option value="CSE">Computer Science (CSE)</option>
+                            <option value="IT">Information Technology (IT)</option>
+                            <option value="ECE">Electronics (ECE)</option>
+                            <option value="MECH">Mechanical (MECH)</option>
+                            <option value="ADMIN">Administration</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>User ID / Email</label>
                         <input type="text" name="username" placeholder="e.g. faculty@test.com" value="faculty@test.com">
                     </div>
                     <div class="input-group">
