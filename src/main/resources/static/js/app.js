@@ -122,12 +122,13 @@ function logout() {
 const startSessionBtn = document.getElementById('start-session-btn');
 if (startSessionBtn) {
     startSessionBtn.addEventListener('click', async () => {
-        if (!navigator.geolocation) return alert('Geolocation is required');
+        const subject = document.getElementById('subject').value;
+        const section = document.getElementById('section').value;
+        const duration = document.getElementById('duration').value;
+        const useMock = document.getElementById('mock-location-check').checked;
 
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const { latitude, longitude } = position.coords;
-            const subject = document.getElementById('subject').value;
-
+        // Helper to send request
+        const sendStartRequest = async (lat, lng) => {
             try {
                 const res = await fetch(`${API_BASE}/start-session`, {
                     method: 'POST',
@@ -135,9 +136,10 @@ if (startSessionBtn) {
                     body: JSON.stringify({
                         facultyId: currentUser.id,
                         subject,
-                        section: 'A',
-                        latitude,
-                        longitude
+                        section,
+                        durationMinutes: duration,
+                        latitude: lat,
+                        longitude: lng
                     })
                 });
 
@@ -149,12 +151,37 @@ if (startSessionBtn) {
                     // Generate QR
                     generateQRCode(currentSession.sessionToken);
                     document.getElementById('display-session-id').innerText = currentSession.id;
+                } else {
+                    alert("Error: " + await res.text());
                 }
             } catch (err) {
-                alert('Failed to start session');
+                alert('Failed to start session: Network error');
             }
-        }, (err) => alert('Location access denied'));
+        };
+
+        if (useMock) {
+            // Mock Coordinates (e.g. Center of Campus)
+            sendStartRequest(12.9716, 77.5946);
+        } else {
+            if (!navigator.geolocation) return alert('Geolocation is required');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    sendStartRequest(latitude, longitude);
+                },
+                (err) => {
+                    if (confirm("Location access denied or failed. Switch to Mock Location Mode for testing?")) {
+                        document.getElementById('mock-location-check').checked = true;
+                        sendStartRequest(12.9716, 77.5946);
+                    } else {
+                        alert('Location access denied. Cannot start session.');
+                    }
+                }
+            );
+        }
     });
+
+    // Also Initialize Checkbox state from localStorage if needed (optional)
 }
 
 function generateQRCode(token) {

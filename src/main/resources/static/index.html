@@ -32,6 +32,34 @@
                         <option value="Database Systems">Database Systems</option>
                     </select>
                 </div>
+
+                <div class="flex-between" style="gap:10px;">
+                    <div class="input-group" style="flex:1">
+                        <label>Section</label>
+                        <select id="section">
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex:1">
+                        <label>Duration</label>
+                        <select id="duration">
+                            <option value="30">30 Mins</option>
+                            <option value="45">45 Mins</option>
+                            <option value="60">1 Hour</option>
+                            <option value="90">1.5 Hours</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="mock-location-check" style="width:auto;">
+                        <span style="font-size:0.9rem; color:var(--text-muted)">Use Developer/Mock Location (Fixes
+                            Access Denied)</span>
+                    </label>
+                </div>
                 <button id="start-session-btn" class="btn btn-primary">Start Session & Generate QR</button>
             </div>
 
@@ -111,14 +139,16 @@
                     <!-- Mock Chart Bars -->
                     <div style="margin-top:10px;">
                         <div class="flex-between" style="font-size:0.8rem; margin-bottom:4px;"><span>CSE</span>
-                            <span>85%</span></div>
+                            <span>85%</span>
+                        </div>
                         <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
                             <div style="width:85%; height:100%; background:var(--primary)"></div>
                         </div>
                     </div>
                     <div style="margin-top:10px;">
                         <div class="flex-between" style="font-size:0.8rem; margin-bottom:4px;"><span>ECE</span>
-                            <span>72%</span></div>
+                            <span>72%</span>
+                        </div>
                         <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
                             <div style="width:72%; height:100%; background:var(--secondary)"></div>
                         </div>

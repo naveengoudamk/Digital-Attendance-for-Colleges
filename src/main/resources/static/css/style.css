@@ -213,3 +213,12 @@ select:focus {
 .mt-4 {
     margin-top: 16px;
 }
+
+/* Checkbox Customization */
+input[type="checkbox"] {
+    accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    cursor: pointer;
+}

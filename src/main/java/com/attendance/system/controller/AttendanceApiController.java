@@ -55,8 +55,12 @@ public class AttendanceApiController {
         String section = (String) payload.get("section");
         double lat = Double.parseDouble(payload.get("latitude").toString());
         double lng = Double.parseDouble(payload.get("longitude").toString());
+        int durationMinutes = payload.get("durationMinutes") != null
+                ? Integer.parseInt(payload.get("durationMinutes").toString())
+                : 60;
 
-        AttendanceSession session = attendanceService.startSession(facultyId, subject, section, lat, lng);
+        AttendanceSession session = attendanceService.startSession(facultyId, subject, section, lat, lng,
+                durationMinutes);
         return ResponseEntity.ok(session);
     }
 

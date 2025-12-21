@@ -25,7 +25,9 @@ public class AttendanceService {
     private UserRepository userRepository;
 
     // Faculty starts a session
-    public AttendanceSession startSession(Long facultyId, String subject, String section, double lat, double lng) {
+    // Faculty starts a session
+    public AttendanceSession startSession(Long facultyId, String subject, String section, double lat, double lng,
+            int durationMinutes) {
         User faculty = userRepository.findById(facultyId).orElseThrow(() -> new RuntimeException("Faculty not found"));
 
         AttendanceSession session = new AttendanceSession();
@@ -33,6 +35,7 @@ public class AttendanceService {
         session.setSubject(subject);
         session.setSection(section);
         session.setStartTime(LocalDateTime.now());
+        session.setEndTime(LocalDateTime.now().plusMinutes(durationMinutes));
         session.setActive(true);
         session.setLatitude(lat);
         session.setLongitude(lng);
