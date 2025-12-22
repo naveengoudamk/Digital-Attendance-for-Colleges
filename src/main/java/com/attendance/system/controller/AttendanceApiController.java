@@ -58,15 +58,25 @@ public class AttendanceApiController {
         int durationMinutes = payload.get("durationMinutes") != null
                 ? Integer.parseInt(payload.get("durationMinutes").toString())
                 : 60;
+        int tokenLength = payload.get("tokenLength") != null
+                ? Integer.parseInt(payload.get("tokenLength").toString())
+                : 0;
 
         AttendanceSession session = attendanceService.startSession(facultyId, subject, section, lat, lng,
-                durationMinutes);
+                durationMinutes, tokenLength);
         return ResponseEntity.ok(session);
     }
 
     @PostMapping("/mark-attendance")
     public ResponseEntity<?> markAttendance(@RequestBody Map<String, Object> payload) {
-        Long sessionId = Long.valueOf(payload.get("sessionId").toString());
+        Long sessionId = null;
+        if (payload.get("sessionId") != null && !payload.get("sessionId").toString().isEmpty()) {
+            try {
+                sessionId = Long.valueOf(payload.get("sessionId").toString());
+            } catch (Exception e) {
+            }
+        }
+
         Long studentId = Long.valueOf(payload.get("studentId").toString());
         double lat = Double.parseDouble(payload.get("latitude").toString());
         double lng = Double.parseDouble(payload.get("longitude").toString());

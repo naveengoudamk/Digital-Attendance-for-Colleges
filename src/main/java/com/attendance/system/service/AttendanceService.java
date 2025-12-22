@@ -27,7 +27,7 @@ public class AttendanceService {
     // Faculty starts a session
     // Faculty starts a session
     public AttendanceSession startSession(Long facultyId, String subject, String section, double lat, double lng,
-            int durationMinutes) {
+            int durationMinutes, int tokenLength) {
         User faculty = userRepository.findById(facultyId).orElseThrow(() -> new RuntimeException("Faculty not found"));
 
         AttendanceSession session = new AttendanceSession();
@@ -39,9 +39,25 @@ public class AttendanceService {
         session.setActive(true);
         session.setLatitude(lat);
         session.setLongitude(lng);
-        session.setSessionToken(UUID.randomUUID().toString()); // Use this to secure QR
+        session.setLongitude(lng);
+
+        if (tokenLength > 0 && tokenLength < 32) {
+            session.setSessionToken(generateRandomToken(tokenLength));
+        } else {
+            session.setSessionToken(UUID.randomUUID().toString());
+        }
 
         return sessionRepository.save(session);
+    }
+
+    private String generateRandomToken(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder sb = new StringBuilder();
+        java.util.Random random = new java.util.Random();
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 
     public void endSession(Long sessionId) {
@@ -53,8 +69,17 @@ public class AttendanceService {
 
     // Student attempts to mark attendance
     public String markAttendance(Long sessionId, Long studentId, double lat, double lng, String qrToken) {
-        AttendanceSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new RuntimeException("Session not found"));
+        AttendanceSession session;
+
+        if (sessionId != null && sessionId > 0) {
+            session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
+        } else {
+            // Try to find by token ONLY
+            session = sessionRepository.findBySessionTokenAndIsActive(qrToken, true)
+                    .orElseThrow(() -> new RuntimeException("Invalid Token or Session Expired"));
+        }
+
         User student = userRepository.findById(studentId).orElseThrow(() -> new RuntimeException("Student not found"));
 
         // 1. Check if session is active

@@ -9,4 +9,6 @@ public interface AttendanceSessionRepository extends JpaRepository<AttendanceSes
     List<AttendanceSession> findByFacultyAndIsActive(User faculty, boolean isActive);
 
     long countByIsActive(boolean isActive);
+
+    java.util.Optional<AttendanceSession> findBySessionTokenAndIsActive(String sessionToken, boolean isActive);
 }

@@ -177,6 +177,33 @@ async function loadStudentHistory() {
     } catch (e) { console.error(e); }
 }
 
+// Student Mode Toggle
+window.setStudentMode = (mode) => {
+    const grpId = document.getElementById('grp-session-id');
+    const scanBtn = document.getElementById('scan-btn');
+    const btnStd = document.getElementById('mode-std-btn');
+    const btnSimple = document.getElementById('mode-simple-btn');
+
+    if (mode === 'simple') {
+        if (grpId) grpId.style.display = 'none';
+        if (scanBtn) scanBtn.style.display = 'none';
+
+        btnSimple.style.opacity = '1';
+        btnSimple.style.background = 'var(--primary)';
+        btnStd.style.opacity = '0.5';
+        btnStd.style.background = 'var(--secondary)';
+
+        document.getElementById('student-session-id').value = '';
+    } else {
+        if (grpId) grpId.style.display = 'block';
+        if (scanBtn) scanBtn.style.display = 'inline-block';
+
+        btnStd.style.opacity = '1';
+        btnStd.style.background = 'var(--primary)';
+        btnSimple.style.opacity = '0.5';
+        btnSimple.style.background = 'var(--secondary)';
+    }
+};
 
 // Logout
 function logout() {
@@ -191,6 +218,8 @@ if (startSessionBtn) {
         const subject = document.getElementById('subject').value;
         const section = document.getElementById('section').value;
         const duration = document.getElementById('duration').value;
+        const tokenType = document.getElementById('token-type').value;
+        const tokenLength = tokenType === 'simple' ? 8 : 0;
         const useMock = document.getElementById('mock-location-check').checked;
 
         // Helper to send request
@@ -204,6 +233,7 @@ if (startSessionBtn) {
                         subject,
                         section,
                         durationMinutes: duration,
+                        tokenLength: tokenLength,
                         latitude: lat,
                         longitude: lng
                     })
@@ -279,7 +309,10 @@ if (manualMarkBtn) {
         const token = document.getElementById('student-token').value;
         const useMock = document.getElementById('student-mock-location').checked;
 
-        if (!sid || !token) return alert("Please enter Session ID and Token");
+        const isSimple = document.getElementById('grp-session-id').style.display === 'none';
+
+        if (!isSimple && !sid) return alert("Please enter Session ID");
+        if (!token) return alert("Please enter Token");
 
         // Helper
         const sendMarkRequest = async (lat, lng) => {

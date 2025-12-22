@@ -54,6 +54,14 @@
                 </div>
 
                 <div class="input-group">
+                    <label>Token Type</label>
+                    <select id="token-type">
+                        <option value="standard">Standard (Scan / ID + Token)</option>
+                        <option value="simple">Simple (8-char Token Only)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
                     <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                         <input type="checkbox" id="mock-location-check" style="width:auto;">
                         <span style="font-size:0.9rem; color:var(--text-muted)">Use Developer/Mock Location (Fixes
@@ -93,7 +101,15 @@
                 <h2>Mark Attendance</h2>
                 <p>Ensure you are in class and location is enabled.</p>
 
-                <div class="input-group">
+                <div class="flex-center mb-3" style="gap:10px; justify-content: flex-start;">
+                    <button class="btn btn-sm active" id="mode-std-btn" onclick="setStudentMode('standard')"
+                        style="opacity:1; background:var(--primary); border:none; color:#fff; padding:5px 10px; border-radius:4px; font-size:0.8rem;">Standard</button>
+                    <button class="btn btn-sm" id="mode-simple-btn" onclick="setStudentMode('simple')"
+                        style="opacity:0.5; background:var(--secondary); border:none; color:#fff; padding:5px 10px; border-radius:4px; font-size:0.8rem;">8-Char
+                        Token</button>
+                </div>
+
+                <div class="input-group" id="grp-session-id">
                     <label>Session ID</label>
                     <input type="text" id="student-session-id" placeholder="Enter ID from Faculty">
                 </div>
