@@ -38,12 +38,14 @@ const roleInput = document.getElementById('role-input');
 const deptGroup = document.getElementById('department-group');
 const deptSelect = document.getElementById('department-select');
 const usernameInput = document.querySelector('input[name="username"]');
+const usernameLabel = document.getElementById('username-label');
 const passwordInput = document.querySelector('input[name="password"]');
 
 const demoCreds = {
-    FACULTY: { user: 'faculty@test.com', pass: 'password', dept: 'CSE' },
-    STUDENT: { user: 'student@test.com', pass: 'password', dept: 'CSE' },
-    ADMIN: { user: 'admin@test.com', pass: 'admin', dept: 'ADMIN' }
+    FACULTY: { user: 'T101', pass: 'password', dept: 'CSE', label: 'Teacher ID', placeholder: 'e.g. T101' },
+    STUDENT: { user: 'S201', pass: 'password', dept: 'CSE', label: 'School ID', placeholder: 'e.g. S201' },
+    ADMIN: { user: 'ADH-001', pass: 'admin', dept: 'ADMIN', label: 'Admin ID', placeholder: 'e.g. ADH-001' },
+    HOD: { user: 'HOD1', pass: 'password', dept: 'CSE', label: 'HOD ID', placeholder: 'e.g. HOD1' }
 };
 
 roleBtns.forEach(btn => {
@@ -62,11 +64,15 @@ roleBtns.forEach(btn => {
             if (deptGroup) deptGroup.style.display = 'block';
         }
 
-        // Auto-fill Demo Credentials
+        // Auto-fill Demo Credentials & Update UI
         if (demoCreds[role]) {
-            if (usernameInput) usernameInput.value = demoCreds[role].user;
+            if (usernameInput) {
+                usernameInput.value = demoCreds[role].user;
+                usernameInput.placeholder = demoCreds[role].placeholder;
+            }
             if (passwordInput) passwordInput.value = demoCreds[role].pass;
             if (deptSelect) deptSelect.value = demoCreds[role].dept;
+            if (usernameLabel) usernameLabel.innerText = demoCreds[role].label;
         }
     });
 });

@@ -101,11 +101,12 @@ public class AttendanceApiController {
             String password = payload.get("password");
             String fullName = payload.get("fullName");
             String department = payload.get("department");
+            String email = payload.get("email");
             String roleStr = payload.get("role");
 
             User.Role role = User.Role.valueOf(roleStr); // simple enum conversion
 
-            User newUser = attendanceService.createUser(username, password, fullName, department, role);
+            User newUser = attendanceService.createUser(username, password, fullName, department, email, role);
             return ResponseEntity.ok(newUser);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -120,5 +121,33 @@ public class AttendanceApiController {
     @GetMapping("/student/{id}/history")
     public ResponseEntity<?> getStudentHistory(@PathVariable Long id) {
         return ResponseEntity.ok(attendanceService.getStudentHistory(id));
+    }
+
+    @GetMapping("/timetable")
+    public ResponseEntity<?> getTimetable() {
+        return ResponseEntity.ok(attendanceService.getAllTimetableEntries());
+    }
+
+    @PostMapping("/admin/timetable")
+    public ResponseEntity<?> createTimetable(@RequestBody Map<String, String> payload) {
+        String dayOfWeek = payload.get("dayOfWeek");
+        String startTime = payload.get("startTime");
+        String endTime = payload.get("endTime");
+        String subject = payload.get("subject");
+        String section = payload.get("section");
+        String facultyId = payload.get("facultyId");
+
+        try {
+            return ResponseEntity.ok(
+                    attendanceService.createTimetableEntry(dayOfWeek, startTime, endTime, subject, section, facultyId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/admin/timetable/{id}")
+    public ResponseEntity<?> deleteTimetable(@PathVariable Long id) {
+        attendanceService.deleteTimetableEntry(id);
+        return ResponseEntity.ok("Deleted");
     }
 }

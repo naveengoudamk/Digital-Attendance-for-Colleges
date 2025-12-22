@@ -8,7 +8,8 @@ let currentSession = null;
 const views = {
     faculty: document.getElementById('faculty-view'),
     student: document.getElementById('student-view'),
-    admin: document.getElementById('admin-view')
+    admin: document.getElementById('admin-view'),
+    hod: document.getElementById('hod-view')
 };
 
 function showView(viewName) {
@@ -27,16 +28,27 @@ function init() {
     if (currentUser.role === 'FACULTY') {
         showView('faculty');
         document.getElementById('user-name-display').innerText = `Welcome, ${currentUser.fullName}`;
+        loadTimetable('FACULTY');
+        document.getElementById('faculty-timetable-card').style.display = 'block';
     }
     else if (currentUser.role === 'STUDENT') {
         showView('student');
         document.getElementById('user-name-display-student').innerText = `Welcome, ${currentUser.fullName}`;
         loadStudentHistory();
+        loadTimetable('STUDENT');
     }
     else if (currentUser.role === 'ADMIN') {
         showView('admin');
         loadAdminStats();
     }
+    else if (currentUser.role === 'HOD') {
+        showView('hod');
+        document.getElementById('hod-dept-name').innerText = currentUser.department;
+        // Load HOD specific data
+        loadHODStats();
+        loadTimetable('HOD'); // Loads all for dept
+    }
+    // Parent removed
     else {
         // Fallback for others
         alert("Unknown Role");
@@ -47,7 +59,8 @@ function init() {
 // Admin Logic
 const views_admin = {
     dashboard: document.getElementById('admin-tab-dashboard'),
-    users: document.getElementById('admin-tab-users')
+    users: document.getElementById('admin-tab-users'),
+    timetable: document.getElementById('admin-tab-timetable')
 }
 
 window.switchAdminTab = (tabName) => {
@@ -60,11 +73,14 @@ window.switchAdminTab = (tabName) => {
     if (tabName === 'users') {
         loadUsers();
     }
+    else if (tabName === 'timetable') {
+        loadTimetable('ADMIN');
+    }
 
     // Update buttons active state
     const btns = document.querySelectorAll('#admin-view .role-btn');
     btns.forEach(b => {
-        if (b.innerText.toLowerCase().includes(tabName === 'dashboard' ? 'overview' : 'users')) {
+        if (b.innerText.toLowerCase().replaceAll(' ', '').includes(tabName)) {
             b.classList.add('active');
         } else {
             b.classList.remove('active');
@@ -101,6 +117,7 @@ async function loadUsers() {
                     <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05)">${u.fullName}</td>
                     <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05)">${u.department}</td>
                     <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05)">${u.username}</td>
+                    <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05)">${u.email || '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -115,14 +132,15 @@ if (createUserForm) {
         const role = document.getElementById('new-user-role').value;
         const fullName = document.getElementById('new-user-name').value;
         const department = document.getElementById('new-user-dept').value;
-        const username = document.getElementById('new-user-email').value;
+        const username = document.getElementById('new-user-id').value; // ID
+        const email = document.getElementById('new-user-email').value; // Email
         const password = document.getElementById('new-user-pass').value;
 
         try {
             const res = await fetch(`${API_BASE}/admin/users`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ role, fullName, department, username, password })
+                body: JSON.stringify({ role, fullName, department, username, email, password })
             });
 
             if (res.ok) {
@@ -136,6 +154,34 @@ if (createUserForm) {
         } catch (err) {
             alert('Error creating user');
         }
+    });
+}
+
+const addTimetableForm = document.getElementById('add-timetable-form');
+if (addTimetableForm) {
+    addTimetableForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const dayOfWeek = document.getElementById('tt-day').value;
+        const startTime = document.getElementById('tt-start').value;
+        const endTime = document.getElementById('tt-end').value;
+        const subject = document.getElementById('tt-subject').value;
+        const section = document.getElementById('tt-section').value;
+        const facultyId = document.getElementById('tt-faculty-id').value;
+
+        try {
+            const res = await fetch(`${API_BASE}/admin/timetable`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dayOfWeek, startTime, endTime, subject, section, facultyId })
+            });
+            if (res.ok) {
+                alert("Class Schedule Added!");
+                addTimetableForm.reset();
+                loadTimetable('ADMIN');
+            } else {
+                alert("Failed: " + await res.text());
+            }
+        } catch (e) { console.error('Error adding timetable', e); }
     });
 }
 
@@ -301,58 +347,89 @@ function generateQRCode(token) {
     }
 }
 
-// Student logic
-const manualMarkBtn = document.getElementById('manual-mark-btn');
-if (manualMarkBtn) {
-    manualMarkBtn.addEventListener('click', () => {
-        const sid = document.getElementById('student-session-id').value;
-        const token = document.getElementById('student-token').value;
-        const useMock = document.getElementById('student-mock-location').checked;
-
-        const isSimple = document.getElementById('grp-session-id').style.display === 'none';
-
-        if (!isSimple && !sid) return alert("Please enter Session ID");
-        if (!token) return alert("Please enter Token");
-
-        // Helper
-        const sendMarkRequest = async (lat, lng) => {
-            try {
-                const res = await fetch(`${API_BASE}/mark-attendance`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        sessionId: sid,
-                        studentId: currentUser.id,
-                        qrToken: token,
-                        latitude: lat,
-                        longitude: lng
-                    })
-                });
-                alert(await res.text());
-                loadStudentHistory(); // Refresh history
-            } catch (e) { alert("Network Error"); }
-        };
-
-        if (useMock) {
-            sendMarkRequest(12.9716, 77.5946);
-        } else {
-            if (!navigator.geolocation) return alert('Geolocation is required');
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    sendMarkRequest(latitude, longitude);
-                },
-                (err) => {
-                    if (confirm("Location access denied. Switch to Mock Location Mode?")) {
-                        document.getElementById('student-mock-location').checked = true;
-                        sendMarkRequest(12.9716, 77.5946);
-                    } else {
-                        alert('Location access denied. Cannot mark attendance.');
-                    }
-                }
-            );
+// HOD & Timetable Logic
+async function loadHODStats() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/stats`);
+        if (res.ok) {
+            const stats = await res.json();
+            document.getElementById('hod-stat-students').innerText = Math.floor(stats.totalStudents / 3);
+            document.getElementById('hod-stat-sessions').innerText = Math.floor(stats.activeSessions / 2);
         }
-    });
+    } catch (e) { }
 }
+
+async function loadTimetable(viewType) {
+    try {
+        let url = `${API_BASE}/timetable`;
+        const res = await fetch(url);
+        if (res.ok) {
+            const allEntries = await res.json();
+            let entries = allEntries;
+            let containerId = '';
+
+            if (viewType === 'STUDENT') {
+                containerId = 'student-timetable-list';
+                entries = allEntries.filter(e => e.section === currentUser.department);
+            } else if (viewType === 'FACULTY') {
+                containerId = 'faculty-timetable-list';
+                entries = allEntries.filter(e => e.faculty.id === currentUser.id);
+            } else if (viewType === 'HOD') {
+                containerId = 'hod-timetable-list';
+                entries = allEntries.filter(e => e.section === currentUser.department);
+            } else if (viewType === 'ADMIN') {
+                containerId = 'admin-timetable-list';
+                entries = allEntries; // Show all
+            }
+
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = '';
+                if (entries.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-muted)">No classes scheduled.</p>';
+                    return;
+                }
+
+                entries.forEach(t => {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.style.padding = '12px';
+                    div.style.marginBottom = '8px';
+                    div.style.background = 'rgba(255,255,255,0.03)';
+
+                    let deleteBtn = '';
+                    if (viewType === 'ADMIN') {
+                        deleteBtn = `<button onclick="deleteTimetableEntry(${t.id})" style="float:right; background:var(--error); border:none; color:white; padding:4px 8px; border-radius:4px; font-size:0.8rem; cursor:pointer;">Delete</button>`;
+                    }
+
+                    div.innerHTML = `
+                        ${deleteBtn}
+                        <div class="flex-between">
+                            <span style="font-weight:bold; color:var(--primary)">${t.dayOfWeek}</span>
+                            <span>${t.startTime} - ${t.endTime}</span>
+                        </div>
+                        <div style="margin-top:4px;">${t.subject}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted)">
+                            Faculty: ${t.faculty ? t.faculty.fullName : 'N/A'} | Section: ${t.section}
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+        }
+    } catch (e) { console.error("Timetable load failed", e); }
+}
+
+window.deleteTimetableEntry = async (id) => {
+    if (!confirm("Delete this schedule?")) return;
+    try {
+        const res = await fetch(`${API_BASE}/admin/timetable/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            loadTimetable('ADMIN');
+        } else {
+            alert("Failed to delete");
+        }
+    } catch (e) { console.error(e); }
+};
 
 init();

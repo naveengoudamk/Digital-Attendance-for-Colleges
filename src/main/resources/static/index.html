@@ -89,6 +89,11 @@
             </div>
         </div>
 
+        <div class="card mt-4" id="faculty-timetable-card" style="display:none">
+            <h3>My Schedule</h3>
+            <div id="faculty-timetable-list"></div>
+        </div>
+
         <!-- Student View -->
         <div id="student-view" class="panel">
             <div class="flex-between mb-4">
@@ -130,6 +135,13 @@
                 <button id="manual-mark-btn" class="btn btn-primary">Mark Attendance</button>
 
                 <div class="mt-4">
+                    <h3>My Timetable</h3>
+                    <div id="student-timetable-list" style="margin-top:10px;">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+
+                <div class="mt-4">
                     <h3>Recent History</h3>
                     <div id="history-list" style="margin-top:10px; font-size:0.9rem; color:var(--text-muted)">
                         <div style="padding:10px; border-bottom:1px solid var(--border)">Java Full Stack - <span
@@ -151,6 +163,59 @@
             <div class="role-selector" style="margin-bottom:20px;">
                 <div class="role-btn active" onclick="switchAdminTab('dashboard')">Overview</div>
                 <div class="role-btn" onclick="switchAdminTab('users')">Manage Users</div>
+                <div class="role-btn" onclick="switchAdminTab('timetable')">Manage Timetable</div>
+            </div>
+
+            <!-- Tab: Manage Timetable -->
+            <div id="admin-tab-timetable" style="display:none;">
+                <div class="card mb-4">
+                    <h3>Existing Timetable</h3>
+                    <div id="admin-timetable-list"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Add Class Schedule</h3>
+                    <form id="add-timetable-form">
+                        <div class="input-group">
+                            <label>Day of Week</label>
+                            <select id="tt-day">
+                                <option value="MONDAY">Monday</option>
+                                <option value="TUESDAY">Tuesday</option>
+                                <option value="WEDNESDAY">Wednesday</option>
+                                <option value="THURSDAY">Thursday</option>
+                                <option value="FRIDAY">Friday</option>
+                                <option value="SATURDAY">Saturday</option>
+                            </select>
+                        </div>
+                        <div class="flex-between" style="gap:10px;">
+                            <div class="input-group" style="flex:1">
+                                <label>Start Time</label>
+                                <input type="time" id="tt-start" required>
+                            </div>
+                            <div class="input-group" style="flex:1">
+                                <label>End Time</label>
+                                <input type="time" id="tt-end" required>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Subject</label>
+                            <input type="text" id="tt-subject" placeholder="e.g. Java Programming" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Section</label>
+                            <select id="tt-section">
+                                <option value="CSE">CSE</option>
+                                <option value="IT">IT</option>
+                                <option value="ECE">ECE</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Faculty ID (e.g. T101)</label>
+                            <input type="text" id="tt-faculty-id" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Schedule</button>
+                    </form>
+                </div>
             </div>
 
             <!-- Tab: Dashboard -->
@@ -208,6 +273,7 @@
                                     <th style="padding:8px; color:var(--text-muted)">Role</th>
                                     <th style="padding:8px; color:var(--text-muted)">Name</th>
                                     <th style="padding:8px; color:var(--text-muted)">Dept</th>
+                                    <th style="padding:8px; color:var(--text-muted)">ID</th>
                                     <th style="padding:8px; color:var(--text-muted)">Email</th>
                                 </tr>
                             </thead>
@@ -226,6 +292,8 @@
                             <select id="new-user-role">
                                 <option value="STUDENT">Student</option>
                                 <option value="FACULTY">Faculty</option>
+                                <option value="HOD">HOD</option>
+                                <option value="PARENT">Parent</option>
                             </select>
                         </div>
                         <div class="input-group">
@@ -241,8 +309,12 @@
                             </select>
                         </div>
                         <div class="input-group">
-                            <label>Email (Username)</label>
-                            <input type="email" id="new-user-email" placeholder="user@test.com" required>
+                            <label>User ID (School ID / Teacher ID)</label>
+                            <input type="text" id="new-user-id" placeholder="e.g. S100 or T500" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="new-user-email" placeholder="user@test.com">
                         </div>
                         <div class="input-group">
                             <label>Password</label>
@@ -254,6 +326,36 @@
             </div>
 
         </div>
+
+        <!-- HOD View -->
+        <div id="hod-view" class="panel">
+            <div class="flex-between mb-4">
+                <div style="font-weight:600">HOD Dashboard (<span id="hod-dept-name"></span>)</div>
+                <button onclick="logout()"
+                    style="background:none; border:none; color:var(--secondary); cursor:pointer;">Logout</button>
+            </div>
+            <div class="card">
+                <h3>Department Overview</h3>
+                <p>Welcome, Head of Department.</p>
+                <!-- Reuse Admin stats logic or similar -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
+                    <div class="card" style="padding:16px; text-align:center; background:rgba(255,255,255,0.02)">
+                        <h3 id="hod-stat-students" style="color:var(--primary); font-size:1.5rem">0</h3>
+                        <small>Dept Students</small>
+                    </div>
+                    <div class="card" style="padding:16px; text-align:center; background:rgba(255,255,255,0.02)">
+                        <h3 id="hod-stat-sessions" style="color:var(--success); font-size:1.5rem">0</h3>
+                        <small>Active Sessions</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-4">
+                <h3>Department Timetable</h3>
+                <div id="hod-timetable-list"></div>
+            </div>
+        </div>
+
+
 
         <script src="js/app.js"></script>
 </body>

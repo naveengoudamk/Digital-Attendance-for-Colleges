@@ -159,11 +159,12 @@ public class AttendanceService {
     }
 
     // Admin: Create User
-    public User createUser(String username, String password, String fullName, String department, User.Role role) {
+    public User createUser(String username, String password, String fullName, String department, String email,
+            User.Role role) {
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("ID/Username already exists");
         }
-        User user = new User(null, username, password, fullName, department, role);
+        User user = new User(null, username, password, fullName, department, email, role);
         return userRepository.save(user);
     }
 
@@ -172,7 +173,27 @@ public class AttendanceService {
         return recordRepository.findByStudent(student);
     }
 
+    @Autowired
+    private com.attendance.system.repository.TimetableRepository timetableRepository;
+
     public java.util.List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public java.util.List<com.attendance.system.model.TimetableEntry> getAllTimetableEntries() {
+        return timetableRepository.findAll();
+    }
+
+    public com.attendance.system.model.TimetableEntry createTimetableEntry(String dayOfWeek, String startTime,
+            String endTime, String subject, String section, String facultyId) {
+        User faculty = userRepository.findByUsername(facultyId)
+                .orElseThrow(() -> new RuntimeException("Faculty ID not found"));
+        com.attendance.system.model.TimetableEntry entry = new com.attendance.system.model.TimetableEntry(dayOfWeek,
+                startTime, endTime, subject, section, faculty);
+        return timetableRepository.save(entry);
+    }
+
+    public void deleteTimetableEntry(Long id) {
+        timetableRepository.deleteById(id);
     }
 }

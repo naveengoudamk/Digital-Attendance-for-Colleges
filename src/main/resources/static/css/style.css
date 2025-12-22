@@ -33,8 +33,9 @@ body {
 
 .app-container {
     width: 100%;
-    max-width: 480px;
-    /* Mobile first feel */
+    /* max-width: 480px; */
+    max-width: 1200px;
+    /* Mobile first feel - Updated to full width */
     padding: 20px;
 }
 
