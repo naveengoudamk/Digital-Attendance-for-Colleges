@@ -389,6 +389,26 @@ async function loadTimetable(viewType) {
                             Faculty: ${t.faculty ? t.faculty.fullName : 'N/A'} | Section: ${t.section}
                         </div>
                     `;
+
+                    if (viewType === 'STUDENT') {
+                        div.style.cursor = 'pointer';
+                        div.title = "Click to check class status";
+                        div.onclick = async () => {
+                            try {
+                                const res = await fetch(`${API_BASE}/session/active?subject=${encodeURIComponent(t.subject)}&section=${encodeURIComponent(t.section)}`);
+                                if (res.ok) {
+                                    const session = await res.json();
+                                    if (confirm(`Class '${t.subject}' is Active!\nSession ID: ${session.id}\nDo you want to mark attendance?`)) {
+                                        document.getElementById('student-session-id').value = session.id;
+                                        // Scroll to mark section
+                                        document.getElementById('manual-mark-btn').scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                } else {
+                                    alert("Class has not started yet.");
+                                }
+                            } catch (e) { console.error(e); }
+                        };
+                    }
                     container.appendChild(div);
                 });
             }

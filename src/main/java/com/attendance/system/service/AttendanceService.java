@@ -196,4 +196,11 @@ public class AttendanceService {
     public void deleteTimetableEntry(Long id) {
         timetableRepository.deleteById(id);
     }
+
+    public java.util.Optional<AttendanceSession> getActiveSession(String subject, String section) {
+        return sessionRepository.findAll().stream()
+                .filter(s -> s.isActive() && s.getSubject().equalsIgnoreCase(subject)
+                        && s.getSection().equalsIgnoreCase(section))
+                .findFirst();
+    }
 }

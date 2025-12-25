@@ -145,6 +145,11 @@ public class AttendanceApiController {
         }
     }
 
+    @GetMapping("/session/active")
+    public ResponseEntity<?> getActiveSession(@RequestParam String subject, @RequestParam String section) {
+        return ResponseEntity.of(attendanceService.getActiveSession(subject, section));
+    }
+
     @DeleteMapping("/admin/timetable/{id}")
     public ResponseEntity<?> deleteTimetable(@PathVariable Long id) {
         attendanceService.deleteTimetableEntry(id);
