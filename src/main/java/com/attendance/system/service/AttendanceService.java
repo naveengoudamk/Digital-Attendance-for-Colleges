@@ -104,7 +104,7 @@ public class AttendanceService {
 
         // 4. Geolocation Proximity
         double distance = calculateDistance(session.getLatitude(), session.getLongitude(), lat, lng);
-        if (distance > 100) { // 100 meters
+        if (distance > 50) { // 50 meters
             return recordRejection(session, student, lat, lng, "Location Mismatch: Distance " + (int) distance + "m");
         }
 

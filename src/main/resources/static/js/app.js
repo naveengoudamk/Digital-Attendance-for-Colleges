@@ -224,32 +224,8 @@ async function loadStudentHistory() {
 }
 
 // Student Mode Toggle
-window.setStudentMode = (mode) => {
-    const grpId = document.getElementById('grp-session-id');
-    const scanBtn = document.getElementById('scan-btn');
-    const btnStd = document.getElementById('mode-std-btn');
-    const btnSimple = document.getElementById('mode-simple-btn');
+// Student Mode Toggle removed
 
-    if (mode === 'simple') {
-        if (grpId) grpId.style.display = 'none';
-        if (scanBtn) scanBtn.style.display = 'none';
-
-        btnSimple.style.opacity = '1';
-        btnSimple.style.background = 'var(--primary)';
-        btnStd.style.opacity = '0.5';
-        btnStd.style.background = 'var(--secondary)';
-
-        document.getElementById('student-session-id').value = '';
-    } else {
-        if (grpId) grpId.style.display = 'block';
-        if (scanBtn) scanBtn.style.display = 'inline-block';
-
-        btnStd.style.opacity = '1';
-        btnStd.style.background = 'var(--primary)';
-        btnSimple.style.opacity = '0.5';
-        btnSimple.style.background = 'var(--secondary)';
-    }
-};
 
 // Logout
 function logout() {
@@ -264,9 +240,7 @@ if (startSessionBtn) {
         const subject = document.getElementById('subject').value;
         const section = document.getElementById('section').value;
         const duration = document.getElementById('duration').value;
-        const tokenType = document.getElementById('token-type').value;
-        const tokenLength = tokenType === 'simple' ? 8 : 0;
-        const useMock = document.getElementById('mock-location-check').checked;
+        const tokenLength = 0; // Standard UUID
 
         // Helper to send request
         const sendStartRequest = async (lat, lng) => {
@@ -310,26 +284,18 @@ if (startSessionBtn) {
             }
         };
 
-        if (useMock) {
-            // Mock Coordinates (e.g. Center of Campus)
-            sendStartRequest(12.9716, 77.5946);
-        } else {
-            if (!navigator.geolocation) return alert('Geolocation is required');
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    sendStartRequest(latitude, longitude);
-                },
-                (err) => {
-                    if (confirm("Location access denied or failed. Switch to Mock Location Mode for testing?")) {
-                        document.getElementById('mock-location-check').checked = true;
-                        sendStartRequest(12.9716, 77.5946);
-                    } else {
-                        alert('Location access denied. Cannot start session.');
-                    }
-                }
-            );
-        }
+        if (!navigator.geolocation) return alert('Geolocation is required');
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                sendStartRequest(latitude, longitude);
+            },
+            (err) => {
+                console.error(err);
+                alert('Location access denied or failed. Ensure permissions are granted and location is on.');
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
     });
 }
 
@@ -431,5 +397,56 @@ window.deleteTimetableEntry = async (id) => {
         }
     } catch (e) { console.error(e); }
 };
+
+
+// Student: Mark Attendance
+const markBtn = document.getElementById('manual-mark-btn');
+if (markBtn) {
+    markBtn.addEventListener('click', () => {
+        const sessionVal = document.getElementById('student-session-id').value;
+        const tokenVal = document.getElementById('student-token').value;
+
+        if (!sessionVal || !tokenVal) {
+            alert("Please enter Session ID and Token");
+            return;
+        }
+
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+                const res = await fetch(`${API_BASE}/mark-attendance`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionVal,
+                        studentId: currentUser.id,
+                        qrToken: tokenVal,
+                        latitude: latitude,
+                        longitude: longitude
+                    })
+                });
+
+                const text = await res.text();
+                if (res.ok) {
+                    alert(text);
+                    loadStudentHistory();
+                } else {
+                    alert("Attendance Failed: " + text);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Network Error");
+            }
+        }, (error) => {
+            console.error(error);
+            alert("Location access denied or failed. Please enable location.");
+        }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+    });
+}
 
 init();
