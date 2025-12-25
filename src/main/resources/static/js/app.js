@@ -285,14 +285,24 @@ if (startSessionBtn) {
         };
 
         if (!navigator.geolocation) return alert('Geolocation is required');
+
+        const originalText = startSessionBtn.innerText;
+        startSessionBtn.innerText = "Locating & Starting...";
+        startSessionBtn.disabled = true;
+
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-                sendStartRequest(latitude, longitude);
+                sendStartRequest(latitude, longitude).finally(() => {
+                    startSessionBtn.innerText = originalText;
+                    startSessionBtn.disabled = false;
+                });
             },
             (err) => {
                 console.error(err);
                 alert('Location access denied or failed. Ensure permissions are granted and location is on.');
+                startSessionBtn.innerText = originalText;
+                startSessionBtn.disabled = false;
             },
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
