@@ -188,6 +188,26 @@ public class AttendanceService {
             String endTime, String subject, String section, String facultyId) {
         User faculty = userRepository.findByUsername(facultyId)
                 .orElseThrow(() -> new RuntimeException("Faculty ID not found"));
+
+        // Conflict Check
+        java.util.List<com.attendance.system.model.TimetableEntry> existing = timetableRepository
+                .findByFaculty(faculty);
+        java.time.LocalTime newStart = java.time.LocalTime.parse(startTime);
+        java.time.LocalTime newEnd = java.time.LocalTime.parse(endTime);
+
+        for (com.attendance.system.model.TimetableEntry e : existing) {
+            if (e.getDayOfWeek().equalsIgnoreCase(dayOfWeek)) {
+                java.time.LocalTime existingStart = java.time.LocalTime.parse(e.getStartTime());
+                java.time.LocalTime existingEnd = java.time.LocalTime.parse(e.getEndTime());
+
+                if (newStart.isBefore(existingEnd) && existingStart.isBefore(newEnd)) {
+                    throw new RuntimeException("Faculty is already engaged in " + e.getSection() +
+                            " (" + e.getSubject() + ") during this time (" + e.getStartTime() + "-" + e.getEndTime()
+                            + "). Please change timing.");
+                }
+            }
+        }
+
         com.attendance.system.model.TimetableEntry entry = new com.attendance.system.model.TimetableEntry(dayOfWeek,
                 startTime, endTime, subject, section, faculty);
         return timetableRepository.save(entry);
