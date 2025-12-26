@@ -177,7 +177,7 @@ if (addTimetableForm) {
             if (res.ok) {
                 alert("Class Schedule Added!");
                 addTimetableForm.reset();
-                loadTimetable('ADMIN');
+                loadTimetable('HOD'); // Refresh HOD list
             } else {
                 alert("Failed: " + await res.text());
             }
@@ -351,73 +351,144 @@ async function loadTimetable(viewType) {
             if (viewType === 'STUDENT') {
                 containerId = 'student-timetable-list';
                 entries = allEntries.filter(e => e.section === currentUser.department);
+                renderSimpleList(entries, containerId, viewType);
             } else if (viewType === 'FACULTY') {
                 containerId = 'faculty-timetable-list';
                 entries = allEntries.filter(e => e.faculty.id === currentUser.id);
+                renderSimpleList(entries, containerId, viewType);
             } else if (viewType === 'HOD') {
                 containerId = 'hod-timetable-list';
                 entries = allEntries.filter(e => e.section === currentUser.department);
-            } else if (viewType === 'ADMIN') {
-                containerId = 'admin-timetable-list';
-                entries = allEntries; // Show all
-            }
-
-            const container = document.getElementById(containerId);
-            if (container) {
-                container.innerHTML = '';
-                if (entries.length === 0) {
-                    container.innerHTML = '<p style="color:var(--text-muted)">No classes scheduled.</p>';
-                    return;
-                }
-
-                entries.forEach(t => {
-                    const div = document.createElement('div');
-                    div.className = 'card';
-                    div.style.padding = '12px';
-                    div.style.marginBottom = '8px';
-                    div.style.background = 'rgba(255,255,255,0.03)';
-
-                    let deleteBtn = '';
-                    if (viewType === 'ADMIN') {
-                        deleteBtn = `<button onclick="deleteTimetableEntry(${t.id})" style="float:right; background:var(--error); border:none; color:white; padding:4px 8px; border-radius:4px; font-size:0.8rem; cursor:pointer;">Delete</button>`;
-                    }
-
-                    div.innerHTML = `
-                        ${deleteBtn}
-                        <div class="flex-between">
-                            <span style="font-weight:bold; color:var(--primary)">${t.dayOfWeek}</span>
-                            <span>${t.startTime} - ${t.endTime}</span>
-                        </div>
-                        <div style="margin-top:4px;">${t.subject}</div>
-                        <div style="font-size:0.8rem; color:var(--text-muted)">
-                            Faculty: ${t.faculty ? t.faculty.fullName : 'N/A'} | Section: ${t.section}
-                        </div>
-                    `;
-
-                    if (viewType === 'STUDENT') {
-                        div.style.cursor = 'pointer';
-                        div.title = "Click to check class status";
-                        div.onclick = async () => {
-                            try {
-                                const res = await fetch(`${API_BASE}/session/active?subject=${encodeURIComponent(t.subject)}&section=${encodeURIComponent(t.section)}`);
-                                if (res.ok) {
-                                    const session = await res.json();
-                                    if (confirm(`Class '${t.subject}' is Active!\nSession ID: ${session.id}\nDo you want to mark attendance?`)) {
-                                        document.getElementById('student-session-id').value = session.id;
-                                        // Scroll to mark section
-                                        document.getElementById('manual-mark-btn').scrollIntoView({ behavior: 'smooth' });
-                                    }
-                                } else {
-                                    alert("Class has not started yet.");
-                                }
-                            } catch (e) { console.error(e); }
-                        };
-                    }
-                    container.appendChild(div);
-                });
+                renderTimetableGrid(entries, containerId);
             }
         }
     } catch (e) { console.error("Timetable load failed", e); }
+}
+
+function renderSimpleList(entries, containerId, viewType) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    if (entries.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted)">No classes scheduled.</p>';
+        return;
+    }
+
+    entries.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.style.padding = '12px';
+        div.style.marginBottom = '8px';
+        div.style.background = 'rgba(255,255,255,0.03)';
+
+        div.innerHTML = `
+            <div class="flex-between">
+                <span style="font-weight:bold; color:var(--primary)">${t.dayOfWeek}</span>
+                <span>${t.startTime} - ${t.endTime}</span>
+            </div>
+            <div style="margin-top:4px;">${t.subject}</div>
+            <div style="font-size:0.8rem; color:var(--text-muted)">
+                Faculty: ${t.faculty ? t.faculty.fullName : 'N/A'} | Section: ${t.section}
+            </div>
+        `;
+
+        if (viewType === 'STUDENT') {
+            div.style.cursor = 'pointer';
+            div.title = "Click to check class status";
+            div.onclick = async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/session/active?subject=${encodeURIComponent(t.subject)}&section=${encodeURIComponent(t.section)}`);
+                    if (res.ok) {
+                        const session = await res.json();
+                        if (confirm(`Class '${t.subject}' is Active!\nSession ID: ${session.id}\nDo you want to mark attendance?`)) {
+                            document.getElementById('student-session-id').value = session.id;
+                            document.getElementById('manual-mark-btn').scrollIntoView({ behavior: 'smooth' });
+                        }
+                    } else {
+                        alert("Class has not started yet.");
+                    }
+                } catch (e) { console.error(e); }
+            };
+        }
+        container.appendChild(div);
+    });
+}
+
+function renderTimetableGrid(entries, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (entries.length === 0) {
+        container.innerHTML = '<p>No schedule found.</p>';
+        return;
+    }
+
+    // 1. Get Unique Time Slots
+    const timeSlots = [...new Set(entries.map(e => `${e.startTime} - ${e.endTime}`))].sort();
+
+    // 2. Build Grid Structure
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.style.marginTop = '10px';
+    table.style.fontSize = '0.9rem';
+
+    // Header Row
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = '<th style="padding:10px; border:1px solid var(--border); background:rgba(255,255,255,0.05)">Day / Time</th>';
+
+    timeSlots.forEach(slot => {
+        const th = document.createElement('th');
+        th.style.padding = '10px';
+        th.style.border = '1px solid var(--border)';
+        th.style.background = 'rgba(255,255,255,0.05)';
+        th.innerText = slot;
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Body Rows (Days)
+    const tbody = document.createElement('tbody');
+    const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+
+    days.forEach(day => {
+        const tr = document.createElement('tr');
+        // Day Cell
+        const tdDay = document.createElement('td');
+        tdDay.style.padding = '10px';
+        tdDay.style.border = '1px solid var(--border)';
+        tdDay.style.fontWeight = 'bold';
+        tdDay.innerText = day;
+        tr.appendChild(tdDay);
+
+        // Slot Cells
+        timeSlots.forEach(slot => {
+            const td = document.createElement('td');
+            td.style.padding = '10px';
+            td.style.border = '1px solid var(--border)';
+            td.style.textAlign = 'center';
+
+            // Find entry for this Day and Slot
+            const entry = entries.find(e => e.dayOfWeek === day && `${e.startTime} - ${e.endTime}` === slot);
+            if (entry) {
+                td.innerHTML = `
+                    <div style="font-weight:bold; color:var(--primary)">${entry.subject}</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted)">${entry.faculty ? entry.faculty.fullName : 'N/A'}</div>
+                    <button onclick="deleteTimetableEntry(${entry.id})" style="margin-top:4px; font-size:0.7rem; background:none; border:none; color:var(--error); cursor:pointer;">[Delete]</button>
+                `;
+            } else {
+                td.innerHTML = '-';
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
 }
 
 window.deleteTimetableEntry = async (id) => {
@@ -425,7 +496,8 @@ window.deleteTimetableEntry = async (id) => {
     try {
         const res = await fetch(`${API_BASE}/admin/timetable/${id}`, { method: 'DELETE' });
         if (res.ok) {
-            loadTimetable('ADMIN');
+            // Reload HOD timetable since that's where we see it now
+            loadTimetable('HOD');
         } else {
             alert("Failed to delete");
         }

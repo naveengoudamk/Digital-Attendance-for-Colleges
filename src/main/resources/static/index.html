@@ -141,60 +141,10 @@
             <div class="role-selector" style="margin-bottom:20px;">
                 <div class="role-btn active" onclick="switchAdminTab('dashboard')">Overview</div>
                 <div class="role-btn" onclick="switchAdminTab('users')">Manage Users</div>
-                <div class="role-btn" onclick="switchAdminTab('timetable')">Manage Timetable</div>
             </div>
 
-            <!-- Tab: Manage Timetable -->
-            <div id="admin-tab-timetable" style="display:none;">
-                <div class="card mb-4">
-                    <h3>Existing Timetable</h3>
-                    <div id="admin-timetable-list"></div>
-                </div>
+            <!-- Tab: Manage Timetable REMOVED -->
 
-                <div class="card">
-                    <h3>Add Class Schedule</h3>
-                    <form id="add-timetable-form">
-                        <div class="input-group">
-                            <label>Day of Week</label>
-                            <select id="tt-day">
-                                <option value="MONDAY">Monday</option>
-                                <option value="TUESDAY">Tuesday</option>
-                                <option value="WEDNESDAY">Wednesday</option>
-                                <option value="THURSDAY">Thursday</option>
-                                <option value="FRIDAY">Friday</option>
-                                <option value="SATURDAY">Saturday</option>
-                            </select>
-                        </div>
-                        <div class="flex-between" style="gap:10px;">
-                            <div class="input-group" style="flex:1">
-                                <label>Start Time</label>
-                                <input type="time" id="tt-start" required>
-                            </div>
-                            <div class="input-group" style="flex:1">
-                                <label>End Time</label>
-                                <input type="time" id="tt-end" required>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Subject</label>
-                            <input type="text" id="tt-subject" placeholder="e.g. Java Programming" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Section</label>
-                            <select id="tt-section">
-                                <option value="CSE">CSE</option>
-                                <option value="IT">IT</option>
-                                <option value="ECE">ECE</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Faculty ID (e.g. T101)</label>
-                            <input type="text" id="tt-faculty-id" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add Schedule</button>
-                    </form>
-                </div>
-            </div>
 
             <!-- Tab: Dashboard -->
             <div id="admin-tab-dashboard">
@@ -329,7 +279,51 @@
             </div>
             <div class="card mt-4">
                 <h3>Department Timetable</h3>
-                <div id="hod-timetable-list"></div>
+                <div id="hod-timetable-list" style="overflow-x:auto;"></div>
+            </div>
+
+            <div class="card mt-4">
+                <h3>Add Class Schedule</h3>
+                <form id="add-timetable-form">
+                    <div class="input-group">
+                        <label>Day of Week</label>
+                        <select id="tt-day">
+                            <option value="MONDAY">Monday</option>
+                            <option value="TUESDAY">Tuesday</option>
+                            <option value="WEDNESDAY">Wednesday</option>
+                            <option value="THURSDAY">Thursday</option>
+                            <option value="FRIDAY">Friday</option>
+                            <option value="SATURDAY">Saturday</option>
+                        </select>
+                    </div>
+                    <div class="flex-between" style="gap:10px;">
+                        <div class="input-group" style="flex:1">
+                            <label>Start Time</label>
+                            <input type="text" id="tt-start" placeholder="HH:MM" required>
+                        </div>
+                        <div class="input-group" style="flex:1">
+                            <label>End Time</label>
+                            <input type="text" id="tt-end" placeholder="HH:MM" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Subject</label>
+                        <input type="text" id="tt-subject" placeholder="e.g. Java Programming" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Section</label>
+                        <select id="tt-section">
+                            <option value="CSE">CSE</option>
+                            <option value="IT">IT</option>
+                            <option value="ECE">ECE</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Faculty ID (e.g. T101)</label>
+                        <input type="text" id="tt-faculty-id" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Schedule</button>
+                </form>
             </div>
         </div>
 
