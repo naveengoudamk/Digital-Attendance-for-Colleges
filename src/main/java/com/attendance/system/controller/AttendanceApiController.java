@@ -50,21 +50,35 @@ public class AttendanceApiController {
 
     @PostMapping("/start-session")
     public ResponseEntity<?> startSession(@RequestBody Map<String, Object> payload) {
-        Long facultyId = Long.valueOf(payload.get("facultyId").toString());
-        String subject = (String) payload.get("subject");
-        String section = (String) payload.get("section");
-        double lat = Double.parseDouble(payload.get("latitude").toString());
-        double lng = Double.parseDouble(payload.get("longitude").toString());
-        int durationMinutes = payload.get("durationMinutes") != null
-                ? Integer.parseInt(payload.get("durationMinutes").toString())
-                : 60;
-        int tokenLength = payload.get("tokenLength") != null
-                ? Integer.parseInt(payload.get("tokenLength").toString())
-                : 0;
+        try {
+            if (payload.get("facultyId") == null) {
+                return ResponseEntity.badRequest().body("Faculty ID is missing. Please re-login.");
+            }
+            Long facultyId = Long.valueOf(payload.get("facultyId").toString());
 
-        AttendanceSession session = attendanceService.startSession(facultyId, subject, section, lat, lng,
-                durationMinutes, tokenLength);
-        return ResponseEntity.ok(session);
+            String subject = (String) payload.get("subject");
+            String section = (String) payload.get("section");
+
+            if (payload.get("latitude") == null || payload.get("longitude") == null) {
+                return ResponseEntity.badRequest().body("Location data is missing. Please enable location.");
+            }
+            double lat = Double.parseDouble(payload.get("latitude").toString());
+            double lng = Double.parseDouble(payload.get("longitude").toString());
+
+            int durationMinutes = payload.get("durationMinutes") != null
+                    ? Integer.parseInt(payload.get("durationMinutes").toString())
+                    : 60;
+            int tokenLength = payload.get("tokenLength") != null
+                    ? Integer.parseInt(payload.get("tokenLength").toString())
+                    : 0;
+
+            AttendanceSession session = attendanceService.startSession(facultyId, subject, section, lat, lng,
+                    durationMinutes, tokenLength);
+            return ResponseEntity.ok(session);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error starting session: " + e.getMessage());
+        }
     }
 
     @PostMapping("/mark-attendance")

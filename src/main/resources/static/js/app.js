@@ -237,6 +237,10 @@ function logout() {
 const startSessionBtn = document.getElementById('start-session-btn');
 if (startSessionBtn) {
     startSessionBtn.addEventListener('click', async () => {
+        if (!currentUser || !currentUser.id) {
+            alert("User session invalid. Please logout and login again.");
+            return;
+        }
         const subject = document.getElementById('subject').value;
         const section = document.getElementById('section').value;
         const duration = document.getElementById('duration').value;
