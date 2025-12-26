@@ -54,6 +54,22 @@ function init() {
         alert("Unknown Role");
         logout();
     }
+
+    // Initialize Time Pickers
+    if (window.flatpickr) {
+        flatpickr("#tt-start", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true
+        });
+        flatpickr("#tt-end", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true
+        });
+    }
 }
 
 // Admin Logic
